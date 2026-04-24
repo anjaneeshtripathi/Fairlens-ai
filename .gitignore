@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+venv/
+env/
+.venv/
+*.egg-info/
+
+# Streamlit secrets — NEVER commit these
+.streamlit/secrets.toml
+
+# Environment variables
+.env
+*.env
+
+# GCP service account keys — NEVER commit
+key.json
+*-key.json
+service-account*.json
+
+# Data cache (auto-downloaded)
+fairlens_ai/data/*.csv
+fairlens_ai/data/*.gz
+
+# Model artifacts (large files)
+fairlens_ai/models/*.pkl
+fairlens_ai/models/*.joblib
+
+# Generated reports
+fairlens_ai/reports/*.txt
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+*.tar

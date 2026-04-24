@@ -1,0 +1,59 @@
+name: Deploy FairLens AI to Google Cloud Run
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  SERVICE_NAME: fairlens-ai
+  REGION: us-central1
+  IMAGE: gcr.io/${{ secrets.GCP_PROJECT_ID }}/fairlens-ai
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Checkout code
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    # 2. Authenticate to Google Cloud
+    - name: Authenticate to GCP
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    # 3. Set up Cloud SDK
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+
+    # 4. Build and push Docker image
+    - name: Build & Push Docker image
+      run: |
+        gcloud builds submit \
+          --tag $IMAGE \
+          ./fairlens_ai
+
+    # 5. Deploy to Cloud Run
+    - name: Deploy to Cloud Run
+      run: |
+        gcloud run deploy $SERVICE_NAME \
+          --image $IMAGE \
+          --platform managed \
+          --region $REGION \
+          --allow-unauthenticated \
+          --port 8080 \
+          --memory 1Gi \
+          --cpu 1 \
+          --max-instances 3 \
+          --set-env-vars GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+
+    # 6. Print URL
+    - name: Get Service URL
+      run: |
+        gcloud run services describe $SERVICE_NAME \
+          --region $REGION \
+          --format 'value(status.url)'
